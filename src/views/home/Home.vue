@@ -1,6 +1,10 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"></nav-bar>
+    <tab-control :titles="['流行','新款','精选']"
+                 @tabClick="tabClick"
+                 ref="tabControl1"
+                 class="tab-control" v-show="isTabFixed"/>
 <!--自定义事件再回顾：子组件Scroll通过this.$emit提交事件到父组件中，父组件通过@scroll来接受并且传到对应自身的方法中-->
     <scroll class="content"
             ref="scroll"
@@ -9,14 +13,15 @@
             :pull-up-load="true"
             @pullingUp="loadMore">
   <!--    动态绑定数据-->
-      <home-swiper :banners="banners"></home-swiper>
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></home-swiper>
       <home-recommend-view :recommends="recommends"/>
       <feature-view/>
   <!--    v-on 语法糖:@-->
-      <tab-control class="tab-control"
-                   :titles="['流行','新款','精选']"
-                    @tabClick="tabClick"/>
+      <tab-control :titles="['流行','新款','精选']"
+                    @tabClick="tabClick"
+                    ref="tabControl2"/>
       <goods-list :goods="showGoods"/>
+      <div><button @click="itemClick">跳转按钮</button></div>
       <ul>
         <li>li1</li>
         <li>li2</li>
@@ -72,9 +77,7 @@
     </scroll>
 <!--    .native:监听组件根元素的原生事件-->
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
-
   </div>
-
 </template>
 
 <script>
@@ -88,10 +91,9 @@
   import Scroll from "../../components/common/scroll/Scroll";
   import BackTop from "../../components/content/backTop/BackTop";
 
-  import {
-    getHomeMultidata,
-    getHomeGoods
-  } from "network/home";
+  import {getHomeMultidata,getHomeGoods} from "network/home";
+  //导入防抖函数
+  import {debounce} from "common/utils";
 
   export default {
     name: "home",
@@ -117,7 +119,10 @@
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: true
+        isShowBackTop: false,
+        tabOffsetTop: 0,
+        isTabFixed: false,
+        saveY: 0
       }
     },
     computed: {
@@ -128,11 +133,25 @@
     created() {
       // 1.请求多个数据
       this.getHomeMultidata();
-
       // 2.请求商品数据
       // this.getHomeGoods('pop')
       // this.getHomeGoods('new')
       // this.getHomeGoods('sell')
+    },
+    mounted() {
+      // 将refresh作为参数传到debounce
+      const refresh = debounce(this.$refs.scroll.refresh, 200)
+      // 图片加载完成的事件监听
+      this.$bus.$on('itemImageLoad', () => {
+        refresh()
+      })
+    },
+    activated() {
+      this.$refs.scroll.scrollTo(0, this.saveY, 0)
+      this.$refs.scroll.refresh()
+    },
+    deactivated() {
+      this.saveY = this.$refs.scroll.getScrollY()
     },
     methods: {
       /**
@@ -150,6 +169,18 @@
             this.currentType = 'sell'
             break
         }
+        this.$refs.tabControl1.currentIndex = index
+        this.$refs.tabControl2.currentIndex = index
+      },
+      itemClick() {
+        this.$router.push('detail/' + '1m7rp9w')
+        // this.$router.push('detail' + this.goodsItem.iid)
+        // this.$router.push({
+        //   path: '/detail',
+        //   query: {
+        //
+        //   }
+        // })
       },
       loadMore() {
         // console.log('loadMore');
@@ -167,7 +198,15 @@
         this.$refs.scroll.scrollTo(0, 0);
       },
       contentScroll(position) {
+        // 1. 判断BackTop是否显示
         this.isShowBackTop = (-position.y) > 600
+        // 2. 决定tabControl是否吸顶(-position.y > this.tabOffsetTop)
+        this.isTabFixed = (-position.y) > this.tabOffsetTop
+      },
+      swiperImageLoad() {
+        // 3.获取到tab的offsetTop，吸顶的事件监听
+        // 所有的组件都有一个属性$el:用于获取组件中的元素
+        this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
       },
       /**
        * 网络请求相关的方法`
@@ -200,33 +239,36 @@
 <!--style scoped只会针对当前组件中的样式生效-->
 <style scoped>
   #home{
-    padding-top: 44px;
+    /*padding-top: 44px;*/
     /*vh-viewport 视口*/
     height: 100vh;
+    /*position: relative;*/
+  }
+
+  .tab-control{
+    position: relative;
+    z-index: 9;
   }
 
   .home-nav{
     background-color: var(--color-tint);
     color: #fff;
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    z-index: 9;
-  }
-
-  .tab-control {
-    /*会根据设置的top值在static和fixed之间切换*/
-    position: sticky;
-    top: 44px;
-
+    /*position: fixed;*/
+    /*left: 0;*/
+    /*right: 0;*/
+    /*top: 0;*/
     /*z-index: 9;*/
   }
 
+
   .content {
-    /*height: 300px;*/
     height: calc(100% - 44px);
     overflow: hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
   }
 
   /*.content {*/
@@ -234,4 +276,5 @@
   /*  overflow: hidden;*/
   /*  margin-top: px;*/
   /*}*/
+
 </style>
