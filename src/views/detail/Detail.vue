@@ -1,12 +1,15 @@
 <template>
   <div id="detail">
     <detail-nav-bar class="detail-nav"/>
-    <scroll class="content">
+    <scroll class="content" ref="scroll">
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"/>
       <detail-shop-info :shop="shop"/>
       <detail-goods-info :detail-info="detailInfo"/>
       <detail-param-info :param-info="paramInfo"/>
+      <detail-comment-info :comment-info="commentInfo"/>
+      <!--复用goodslist组件用作推荐商品-->
+      <goods-list :goods="recommends"/>
     </scroll>
   </div>
 </template>
@@ -17,10 +20,14 @@
   import DetailShopInfo from "./childComps/DetailShopInfo";
   import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
   import DetailParamInfo from './childComps/DetailParamInfo'
+  import DetailCommentInfo from './childComps/DetailCommentInfo'
 
   import Scroll from "../../components/common/scroll/Scroll";
+  import GoodsList from "../../components/content/goods/GoodsList";
 
-  import {getDetail, Goods, Shop, GoodsParam} from 'network/detail'
+  //导入mixin
+  import {itemListenerMixin} from 'common/mixin'
+  import {getDetail, Goods, Shop, GoodsParam, getRecommend} from 'network/detail'
 
   export default {
     name: "Detail",
@@ -30,8 +37,11 @@
       DetailShopInfo,
       DetailGoodsInfo,
       DetailParamInfo,
+      DetailCommentInfo,
+      GoodsList,
       Scroll
     },
+    mixins: [itemListenerMixin],
     data() {
       return {
         iid: null,
@@ -39,7 +49,9 @@
         goods: {},
         shop: {},
         detailInfo: {},
-        paramInfo: {}
+        paramInfo: {},
+        commentInfo: {},
+        recommends: []
       }
     },
     created() {
@@ -66,7 +78,24 @@
 
         // 6.获取参数信息
         this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
+
+        // 7.取出评论信息
+        if(data.rate.cRate !== 0) {
+          this.commentInfo = data.rate.list[0]
+        }
+
       })
+
+      // 3.请求推荐数据
+      getRecommend().then(res => {
+        this.recommends = res.data.list
+      })
+    },
+    mounted() {
+
+    },
+    destroyed() {
+      this.$bus.$off('itemImgLoad')
     }
   }
 </script>

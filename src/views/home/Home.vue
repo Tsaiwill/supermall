@@ -92,8 +92,8 @@
   import BackTop from "../../components/content/backTop/BackTop";
 
   import {getHomeMultidata,getHomeGoods} from "network/home";
-  //导入防抖函数
-  import {debounce} from "common/utils";
+  // 导入封装了mixin的js
+  import {itemListenerMixin} from 'common/mixin'
 
   export default {
     name: "home",
@@ -107,6 +107,7 @@
       Scroll,
       BackTop
     },
+    mixin: [itemListenerMixin],
     data() {
       return {
         // 1.定义一个变量用于保存请求过来的数据
@@ -139,19 +140,19 @@
       // this.getHomeGoods('sell')
     },
     mounted() {
-      // 将refresh作为参数传到debounce
-      const refresh = debounce(this.$refs.scroll.refresh, 200)
-      // 图片加载完成的事件监听
-      this.$bus.$on('itemImageLoad', () => {
-        refresh()
-      })
+      console.log('混入mixin的代码回合mounted的代码合并');
     },
     activated() {
       this.$refs.scroll.scrollTo(0, this.saveY, 0)
       this.$refs.scroll.refresh()
     },
     deactivated() {
+      // 1.保存Y值
       this.saveY = this.$refs.scroll.getScrollY()
+
+      // 2.取消全局事件的监听
+      // 将事件定义为变量后，就可以取消了
+      this.$bus.$off('itemImgLoad', this.itemImgListener)
     },
     methods: {
       /**
@@ -169,6 +170,8 @@
             this.currentType = 'sell'
             break
         }
+        // 将两个tabControl的状态保持一致，通过TabControl组件向父组件发送事件tabclick(index),
+        // 通过index参数来将currentType选定并赋值到this.currentType中
         this.$refs.tabControl1.currentIndex = index
         this.$refs.tabControl2.currentIndex = index
       },
@@ -244,12 +247,10 @@
     height: 100vh;
     /*position: relative;*/
   }
-
   .tab-control{
     position: relative;
     z-index: 9;
   }
-
   .home-nav{
     background-color: var(--color-tint);
     color: #fff;
@@ -259,8 +260,6 @@
     /*top: 0;*/
     /*z-index: 9;*/
   }
-
-
   .content {
     height: calc(100% - 44px);
     overflow: hidden;
@@ -270,11 +269,9 @@
     left: 0;
     right: 0;
   }
-
   /*.content {*/
   /*  height: calc(100% - 93px);*/
   /*  overflow: hidden;*/
   /*  margin-top: px;*/
   /*}*/
-
 </style>

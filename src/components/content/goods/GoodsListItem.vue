@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="" @load="imageLoad" >
+    <img :src="showImage" alt="" @load="imageLoad" >
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -20,9 +20,22 @@
         }
       }
     },
+    computed: {
+      // 设置一个计算属性用于判断显示图片的哪个路径
+      showImage() {
+        return this.product.image || this.product.show.img
+      }
+    },
     methods: {
       imageLoad() {
         this.$bus.$emit('itemImageLoad')
+
+        // if (this.$route.path.indexOf('/home')) {
+        //    this.$bus.$emit('itemImgLoad')
+        // } else if (this.$route.path.indexOf('/detail')) {
+        //    this.$bus.$emit('detailItemImgLoad')
+        // }
+
       },
       itemClick() {
         this.$router.push('detail' + '1m7rp9w')
