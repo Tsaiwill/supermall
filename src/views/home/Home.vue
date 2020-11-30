@@ -89,11 +89,11 @@
   import TabControl from "components/content/tabControl/TabControl";
   import GoodsList from "../../components/content/goods/GoodsList";
   import Scroll from "../../components/common/scroll/Scroll";
-  import BackTop from "../../components/content/backTop/BackTop";
+  // import BackTop from "../../components/content/backTop/BackTop";
 
   import {getHomeMultidata,getHomeGoods} from "network/home";
   // 导入封装了mixin的js
-  import {itemListenerMixin} from 'common/mixin'
+  import {itemListenerMixin, backTopMix} from 'common/mixin'
 
   export default {
     name: "home",
@@ -105,9 +105,9 @@
       TabControl,
       GoodsList,
       Scroll,
-      BackTop
+      // BackTop
     },
-    mixin: [itemListenerMixin],
+    mixins: [itemListenerMixin, backTopMix],
     data() {
       return {
         // 1.定义一个变量用于保存请求过来的数据
@@ -120,9 +120,9 @@
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: false,
         tabOffsetTop: 0,
         isTabFixed: false,
+        // isShowBackTop: false,
         saveY: 0
       }
     },
@@ -191,20 +191,22 @@
         this.getHomeGoods(this.currentType)
 
       },
-      backClick() {
-        // 先通过this.$refs.scroll拿到scroll组件
-        // 再拿scroll变量也就是整个滚动的部分
-        // 再调用scrollTo方法
-        // this.$refs.scroll.scroll.scrollTo(0, 0);
-
-        // 将滚动部分的方法封装到scroll组件中，这里只做调用
-        this.$refs.scroll.scrollTo(0, 0);
-      },
+      // backClick() {
+      //   // 先通过this.$refs.scroll拿到scroll组件
+      //   // 再拿scroll变量也就是整个滚动的部分
+      //   // 再调用scrollTo方法
+      //   // this.$refs.scroll.scroll.scrollTo(0, 0);
+      //
+      //   // 将滚动部分的方法封装到scroll组件中，这里只做调用
+      //   this.$refs.scroll.scrollTo(0, 0, 300);
+      // },
       contentScroll(position) {
         // 1. 判断BackTop是否显示
-        this.isShowBackTop = (-position.y) > 600
+        // this.isShowBackTop = (-position.y) > 600
+        // 调用mixin里封装的backTop
+        this.listenBackShow(position)
         // 2. 决定tabControl是否吸顶(-position.y > this.tabOffsetTop)
-        this.isTabFixed = (-position.y) > this.tabOffsetTop
+        // this.isTabFixed = (-position.y) > this.tabOffsetTop
       },
       swiperImageLoad() {
         // 3.获取到tab的offsetTop，吸顶的事件监听
@@ -261,7 +263,7 @@
     /*z-index: 9;*/
   }
   .content {
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 44px);
     overflow: hidden;
     position: absolute;
     top: 44px;

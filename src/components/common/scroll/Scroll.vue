@@ -37,7 +37,7 @@
           // 我们将probeType设置成一个变量在props中，通过父组件传值进来
           // 监听滚动需要添加的属性
           probeType: this.probeType,
-          // 上拉加载需要添加的属性
+          // 上拉加载更多需要添加的属性
           pullUpLoad: this.pullUpLoad
       })
       // 2.监听滚动的位置

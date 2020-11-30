@@ -8,8 +8,43 @@
     </div>
     <div class="info-key">{{detailInfo.detailImage[0].key}}</div>
     <div class="info-list">
-      <img v-for="(item, index) in detailInfo.detailImage[0].list" :key="index" :src="item" @load="imgLoad" alt="">
+      <img v-for="(item, index) in detailInfo.detailImage[0].list"
+           :key="index"
+           :src="item"
+           @load="imgLoad" alt="">
     </div>
+    <ul>
+      <li>goodsli1</li>
+      <li>li2</li>
+      <li>li3</li>
+      <li>li4</li>
+      <li>li5</li>
+      <li>li6</li>
+      <li>li7</li>
+      <li>li8</li>
+      <li>li9</li>
+      <li>li10</li>
+      <li>li11</li>
+      <li>li12</li>
+      <li>li13</li>
+      <li>li14</li>
+      <li>li15</li>
+      <li>li16</li>
+      <li>li17</li>
+      <li>li18</li>
+      <li>li19</li>
+      <li>li20</li>
+      <li>li21</li>
+      <li>li22</li>
+      <li>li23</li>
+      <li>li24</li>
+      <li>li25</li>
+      <li>li26</li>
+      <li>li27</li>
+      <li>li28</li>
+      <li>li29</li>
+      <li>li30</li>
+    </ul>
   </div>
 </template>
 
