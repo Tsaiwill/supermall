@@ -12,6 +12,8 @@ export default {
     payload.count++
   },
   [ADD_TO_CART](state, payload) {
+    // 添加到购物车后同时修改选中状态
+    payload.isChecked = true
     state.cartList.push(payload)
   }
 }

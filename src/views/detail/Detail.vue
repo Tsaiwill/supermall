@@ -7,13 +7,14 @@
             @scroll="contentScroll"
             :pull-up-load="true">
       <detail-swiper :top-images="topImages"></detail-swiper>
-      <detail-base-info :goods="goods"/>
-      <detail-shop-info :shop="shop"/>
+      <detail-base-info :goods="goodsInfo"/>
+      <detail-shop-info :shop="shopInfo"/>
       <detail-goods-info :detail-info="detailInfo"/>
       <detail-param-info ref="params" :param-info="paramInfo"/>
       <detail-comment-info ref="comment" :comment-info="commentInfo"/>
       <!--复用goodslist组件用作推荐商品-->
       <goods-list ref="recommend" :goods="recommends"/>
+      <toast :message="message" :show="show"/>
     </scroll>
     <detail-bottom-bar @addCart="addToCart"/>
   </div>
@@ -36,6 +37,9 @@
   import {itemListenerMixin, backTopMix} from 'common/mixin'
   import {getDetail, Goods, Shop, GoodsParam, getRecommend} from 'network/detail'
   import {debounce} from "common/utils";
+  import { mapActions } from 'vuex'
+
+  import Toast from "../../components/common/toast/Toast";
 
   export default {
     name: "Detail",
@@ -49,6 +53,7 @@
       DetailCommentInfo,
       DetailBottomBar,
       GoodsList,
+      Toast,
       Scroll
     },
     mixins: [itemListenerMixin, backTopMix],
@@ -56,15 +61,17 @@
       return {
         iid: null,
         topImages: [],
-        goods: {},
-        shop: {},
+        goodsInfo: {},
+        shopInfo: {},
         detailInfo: {},
         paramInfo: {},
         commentInfo: {},
         recommends: [],
         themeTopYs: [],
         getThemeTopY: null,
-        currentIndex: 0
+        currentIndex: 0,
+        message: '',
+        show: false
       }
     },
     created() {
@@ -123,6 +130,7 @@
       this.$bus.$off('itemImgLoad')
     },
     methods: {
+      ...mapActions(['addCart']),
       detailImageLoad() {
         this.getThemeTopY()
       },
@@ -155,7 +163,34 @@
         product.iid = this.iid
 
         // 2.将商品添加到购物车
-        this.$store.dispatch('addCart', product)
+        // vuex补充内容：
+        // 1.如果你在vuex里面做了某个操作，你想让外面知道这个操作就要用Promise
+        // 2.mapActions：
+           // 2.1 通过import { mapActions } from 'vuex' 导入
+           // 2.2 在methods: {...mapActions(['addCart'])}
+           // 2.3 通过this.addCart(product).then(res => {})调用即可
+        this.addCart(product).then(res => {
+            // this.addCart传到actions.js中
+
+            // 手动执行不利于复用
+            // this.show = true;
+            // this.message = res;
+            //
+            // setTimeout(() => {
+            //   this.show = false
+            //   this.message = ''
+            // }, 1500)
+
+            // 这里使用的是index.js中的Vue.prototype.$toast
+            this.$toast.show(res, 1500)
+        })
+
+        // a.加入购物车弹窗的制作
+        // c.dispatch过去actions，得到返回一个Promise
+        // d.通过then来接着操作
+        // this.$store.dispatch('addCart', product).then(res => {
+        //
+        // })
       }
     }
   }

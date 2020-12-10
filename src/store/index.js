@@ -8,10 +8,11 @@ import getters from "./getters"
 // 1.安装插件
 Vue.use(Vuex)
 
-// 2.创建Store对象
+// 抽取state但不抽到其他文件
 const state = {
   cartList: []
 }
+// 2.创建Store对象
 const store = new Vuex.Store({
   state,
   mutations,

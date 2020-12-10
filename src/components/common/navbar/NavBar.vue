@@ -5,7 +5,7 @@
 <!--    这里需要对slot进行布局，布局我们需要用div包起来-->
 <!--    这里用具名插槽-->
     <div class="left"><slot name="left"></slot></div>
-    <div class="center"><slot name="center">购物街</slot></div>
+    <div class="center"><slot name="center"></slot></div>
     <div class="right"><slot name="right"></slot></div>
   </div>
 </template>
